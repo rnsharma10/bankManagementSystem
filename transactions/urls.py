@@ -7,4 +7,5 @@ urlpatterns = [
     path('about', about, name='about' ),
     path('deposit/', depositView, name='deposit'),
     path('withdrawal/', withdrawalView, name='withdrawal'),
+    
 ]

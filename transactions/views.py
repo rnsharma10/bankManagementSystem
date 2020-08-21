@@ -4,12 +4,12 @@ from transactions.models import Deposit, Withdrawal
 from django.db.models import Sum
 from django.contrib.auth.decorators import login_required
 from .forms import DepositForm, WithdrawalForm
+from .email_system import creditMessage, debitMessage
 # Create your views here.
 def home(request):
 	if not request.user.is_authenticated:
 		return render(request, "home.html")
 	else:
-
 		customer = Customer.objects.get(user=request.user)
 		deposit = Deposit.objects.filter(customer=customer)
 		deposit_total = deposit.aggregate(Sum('amount'))['amount__sum']
@@ -45,6 +45,7 @@ def depositView(request):
 
 				customer.balance += deposit.amount
 				customer.save()
+				creditMessage(customer.account_no, deposit.amount, customer.balance, customer.email)
 				return redirect('/')
 
 			else:
@@ -71,14 +72,15 @@ def withdrawalView(request):
 		form = WithdrawalForm(request.POST)
 		if form.is_valid():
 			if int(request.POST['amount']) <= 10000000 and int(request.POST['amount']) > 0:
-				
+				withdraw = form.save(commit=False)
+				customer = get_object_or_404(Customer, user=request.user)
 				if withdraw.amount <= customer.balance:
-					withdraw = form.save(commit=False)
-					customer = get_object_or_404(Customer, user=request.user)
+					
 					withdraw.customer = customer
 					withdraw.save()
 					customer.balance -= withdraw.amount
 					customer.save()
+					debitMessage(customer.account_no, withdraw.amount, customer.balance, customer.email)
 					return redirect('/')
 				else:
 					messages.append("You can not withdraw amount more than the balance in your account.")
