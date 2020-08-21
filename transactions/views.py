@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponse
 from accounts.models import Customer
 from transactions.models import Deposit, Withdrawal
 from django.db.models import Sum
@@ -6,6 +7,8 @@ from django.contrib.auth.decorators import login_required
 from .forms import DepositForm, WithdrawalForm
 from .email_system import creditMessage, debitMessage
 from .filters import DepositTransactionFilter
+import xlwt
+from datetime import datetime
 
 # Create your views here.
 def home(request):
@@ -104,6 +107,7 @@ def recordSheetView(request):
 	deposit = Deposit.objects.all()
 	depositTransactionFilter = DepositTransactionFilter(request.GET, queryset=deposit)
 	deposit = depositTransactionFilter.qs
+	print(depositTransactionFilter)
 	withdrawal = Withdrawal.objects.all()
 	
 	
@@ -113,3 +117,25 @@ def recordSheetView(request):
 		'withdrawal': withdrawal,
 	}
 	return render(request, 'recordSheet.html', context)
+
+def export_excel(request):
+	response = HttpResponse(content_type='application/ms-excel')
+	response['Content-Disposition'] = 'attachment; filename=DepositTransactions' + str(datetime.now())+'.xls'
+
+	wb = xlwt.Workbook(encoding='utf-8')
+	ws = wb.add_sheet('Transactions')
+	row_num = 0
+	font_style=xlwt.XFStyle()
+	font_style.font.bold = True
+
+	columns = ['Sr.no.', 'Account', 'Date', 'Amount']
+	for col_num in range(len(columns)):
+		ws.write(row_num, col_num, columns[col_num], font_style)
+
+	rows = Deposit.objects.all().value_list('customer','timestamp', 'amount')
+	for row in rows:
+		row_num+=1
+		for col_num in range(len(row)):
+			ws.write(row_num, col_num, str(row[col_num]), font_style)
+	wb.save(response)
+	return response
