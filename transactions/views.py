@@ -132,7 +132,7 @@ def export_excel(request):
 	for col_num in range(len(columns)):
 		ws.write(row_num, col_num, columns[col_num], font_style)
 
-	rows = Deposit.objects.all().value_list('customer','timestamp', 'amount')
+	rows = Deposit.objects.all().values_list('customer.account_no','timestamp', 'amount')
 	for row in rows:
 		row_num+=1
 		for col_num in range(len(row)):
