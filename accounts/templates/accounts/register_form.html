@@ -8,7 +8,7 @@
 <form method="POST" action="" enctype='multipart/form-data'>
     {% csrf_token %}
     {{ user_form|crispy }}
-    {{ account_form|crispy }}
+    {{ customer_form|crispy }}
     <br>
     <input class="btn btn-success" type="submit" value='Submit'>
 </form>

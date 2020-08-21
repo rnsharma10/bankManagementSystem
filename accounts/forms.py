@@ -7,6 +7,9 @@ from .models import Customer
 
 
 class UserRegistrationForm(UserCreationForm):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.fields['email'].required = True
 	class Meta:
 		model = User
 		fields = [
@@ -19,11 +22,9 @@ class CustomerForm(forms.ModelForm):
 	class Meta:
 		model = Customer
 		fields = [
-
 			'name',
 			'gender',
 			'phone'
-
 		]
 class UserLoginForm(forms.Form):
 	account_no = forms.CharField()
