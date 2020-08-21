@@ -5,6 +5,7 @@ from .forms import UserLoginForm, CustomerForm, UserRegistrationForm
 from django.contrib import messages
 from .models import Customer
 from .account_no_generate import accountGenerate
+from django.contrib.auth.models import User
 
 # Create your views here.
 def register_view(request):
@@ -13,10 +14,31 @@ def register_view(request):
 	else:
 		user_form = UserRegistrationForm(request.POST or None)
 		customer_form = CustomerForm(request.POST or None)
-		if user_form.is_valid() and customer_form.is_valid:
-			user = user_form.save(commit=false)
-			customer_details = customer_form.save(commit=False)
-			password1 = user_form.cleaned_date.get('password1')
+
+		if user_form.is_valid() and customer_form.is_valid():
+
+			email = user_form.cleaned_data.get('email')
+			password1 = user_form.cleaned_data.get('password1')
+
+			username = accountGenerate()
+
+			user = User.objects.create_user(username=username, email=email, password=password1)
+			customer = Customer(
+				user=user, 
+				name=customer_form.cleaned_data.get('name'),
+				account_no=int(username), 
+				gender=customer_form.cleaned_data.get('gender'),
+				email=email, 
+				phone=customer_form.cleaned_data.get('phone'),
+			)
+			customer.save()
+			login(request, user)
+			messages.success(request,
+				'''Hi, {}! Your account has been opened in Private bank. Your Account number is {}. 
+				Please use this for login next time.'''.format(
+				customer.name, customer.account_no)
+			)
+			return redirect("transactions:home")
 		context = {
 			'title':'Create Bank Account',
 			'user_form': user_form,

@@ -1,4 +1,5 @@
 from .models import Customer
+from django.db.models import Max
 def accountGenerate():
 	largest = Customer.objects.all().aggregate(
 		Max('account_no')
@@ -7,5 +8,5 @@ def accountGenerate():
 		largest+=1
 	else:
 		largest = 10000000
-		
-	return largest
+
+	return str(largest)
