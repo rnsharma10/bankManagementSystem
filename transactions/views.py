@@ -5,6 +5,8 @@ from django.db.models import Sum
 from django.contrib.auth.decorators import login_required
 from .forms import DepositForm, WithdrawalForm
 from .email_system import creditMessage, debitMessage
+from .filters import DepositTransactionFilter
+
 # Create your views here.
 def home(request):
 	if not request.user.is_authenticated:
@@ -96,3 +98,18 @@ def withdrawalView(request):
 		context['form'] = form
 		context['balance'] = get_object_or_404(Customer, user=request.user).balance
 		return render(request, "transactions/form.html", context)
+
+
+def recordSheetView(request):
+	deposit = Deposit.objects.all()
+	depositTransactionFilter = DepositTransactionFilter(request.GET, queryset=deposit)
+	deposit = depositTransactionFilter.qs
+	withdrawal = Withdrawal.objects.all()
+	
+	
+	context = {
+		'depositTransactionFilter': depositTransactionFilter,
+		'deposit': deposit,
+		'withdrawal': withdrawal,
+	}
+	return render(request, 'recordSheet.html', context)
