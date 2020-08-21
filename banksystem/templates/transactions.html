@@ -20,9 +20,9 @@
   <div class="col-xs-6 col-md-4 text-left">
     <h4><b>Account No: </b>{{ customer.account_no }}</h4><br><br>
     <div class="well">
-    <h4 class="card"><b>Account Balance: </b>{{ customer.balance }} $</h4>
-    <a class="btn btn-success" href="#">Deposit</a>
-    <a class="btn btn-danger" href="#">Withdraw</a>
+    <h4 class="card"><b>Account Balance: </b>{{ customer.balance }} Rs.</h4>
+    <a class="btn btn-success" href="{% url 'transactions:deposit' %}">Deposit</a>
+    <a class="btn btn-danger" href="{% url 'transactions:withdrawal' %}">Withdraw</a>
     </div>
   </div>
 
@@ -41,7 +41,7 @@
       <th>#</th>
       <th>Date / Time</th>
       <th>Details</th>
-      <th>Amount ($)</th>
+      <th>Amount (Rs.)</th>
     </tr>
   </thead>
   <tbody>
@@ -56,7 +56,7 @@
     <tr>
       <th class="text-right" scope="row" colspan="3">Total</th>
 
-      <td>{{ deposit_sum }}</td>
+      <td>{{ deposit_total }}</td>
     </tr>
    
   </tbody>
@@ -71,7 +71,7 @@
       <th>#</th>
       <th>Date / Time</th>
       <th>Details</th>
-      <th>Amount ($)</th>
+      <th>Amount (Rs.)</th>
     </tr>
   </thead>
   <tbody>
@@ -86,7 +86,7 @@
     <tr>
       <th class="text-right" scope="row" colspan="3">Total</th>
 
-      <td>{{ withdrawal_sum }}</td>
+      <td>{{ withdrawal_total }}</td>
     </tr>
    
   </tbody>

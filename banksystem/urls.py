@@ -20,8 +20,6 @@ from transactions.views import home, about
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('accounts.urls')),
-    path('', home, name='about'),
-    path('about', about, name='about' ),
+    path('accounts/', include('accounts.urls')),
     path('', include('transactions.urls'))
 ]
