@@ -12,6 +12,9 @@ class Deposit(models.Model):
 	def __str__(self):
 		return str(self.customer)+"->"+str(self.amount)
 
+	def timestamp_pretty(self):
+		return self.timestamp.strftime('%b %e %Y')
+
 class Withdrawal(models.Model):
 	customer = models.ForeignKey(Customer, on_delete = models.CASCADE)
 	amount = models.DecimalField(max_digits = 8, decimal_places=2)
@@ -19,3 +22,6 @@ class Withdrawal(models.Model):
 
 	def __str__(self):
 		return str(self.customer)+"->"+str(self.amount)
+
+	def timestamp_pretty(self):
+		return self.timestamp.strftime('%b %e %Y')

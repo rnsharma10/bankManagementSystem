@@ -8,5 +8,5 @@ urlpatterns = [
     path('deposit/', depositView, name='deposit'),
     path('withdrawal/', withdrawalView, name='withdrawal'),
     path('recordSheet/', recordSheetView, name='recordSheet'),
-    path('export_excel/', export_excel, name='export_excel')
+    path('export_excel/<str:type>', export_excel, name='export_excel')
 ]

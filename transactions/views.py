@@ -6,9 +6,10 @@ from django.db.models import Sum
 from django.contrib.auth.decorators import login_required
 from .forms import DepositForm, WithdrawalForm
 from .email_system import creditMessage, debitMessage
-from .filters import DepositTransactionFilter
+from .filters import DepositTransactionFilter, WithdrawalTransactionFilter
 import xlwt
 from datetime import datetime
+from openpyxl import Workbook
 
 # Create your views here.
 def home(request):
@@ -50,7 +51,7 @@ def depositView(request):
 
 				customer.balance += deposit.amount
 				customer.save()
-				creditMessage(customer.account_no, deposit.amount, customer.balance, customer.email)
+				# creditMessage(customer.account_no, deposit.amount, customer.balance, customer.email)
 				return redirect('/')
 
 			else:
@@ -85,7 +86,7 @@ def withdrawalView(request):
 					withdraw.save()
 					customer.balance -= withdraw.amount
 					customer.save()
-					debitMessage(customer.account_no, withdraw.amount, customer.balance, customer.email)
+					# debitMessage(customer.account_no, withdraw.amount, customer.balance, customer.email)
 					return redirect('/')
 				else:
 					messages.append("You can not withdraw amount more than the balance in your account.")
@@ -105,37 +106,63 @@ def withdrawalView(request):
 
 def recordSheetView(request):
 	deposit = Deposit.objects.all()
+	withdrawal = Withdrawal.objects.all()
 	depositTransactionFilter = DepositTransactionFilter(request.GET, queryset=deposit)
+	withdrawalTransactionFilter = WithdrawalTransactionFilter(request.GET, queryset=withdrawal)
 	deposit = depositTransactionFilter.qs
 	print(depositTransactionFilter)
 	withdrawal = Withdrawal.objects.all()
 	
-	
+	# response = export_excel(deposit)
+
 	context = {
+		'withdrawalTransactionFilter': withdrawalTransactionFilter,
 		'depositTransactionFilter': depositTransactionFilter,
 		'deposit': deposit,
 		'withdrawal': withdrawal,
 	}
 	return render(request, 'recordSheet.html', context)
 
-def export_excel(request):
-	response = HttpResponse(content_type='application/ms-excel')
-	response['Content-Disposition'] = 'attachment; filename=DepositTransactions' + str(datetime.now())+'.xls'
+def export_excel(request, type):
+	qs=None
+	if type=='Deposit':
+		qs=Deposit.objects.all()
+	elif type=='Withdrawal':
+		qs=Withdrawal.objects.all()
 
-	wb = xlwt.Workbook(encoding='utf-8')
-	ws = wb.add_sheet('Transactions')
-	row_num = 0
-	font_style=xlwt.XFStyle()
-	font_style.font.bold = True
+	response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',)
+	response['Content-Disposition'] = 'attachment; filename={date}-DebitTransaction.xlsx'.format(date=datetime.now().strftime('%Y-%m-%d'),)
+	workbook = Workbook()
 
-	columns = ['Sr.no.', 'Account', 'Date', 'Amount']
-	for col_num in range(len(columns)):
-		ws.write(row_num, col_num, columns[col_num], font_style)
+	worksheet = workbook.active
+	columns = [
+        
+        'Account_no',
+        'Name',
+        'Date',
+        'Type',
+        'Amount',
+    ]
 
-	rows = Deposit.objects.all().values_list('customer.account_no','timestamp', 'amount')
-	for row in rows:
-		row_num+=1
-		for col_num in range(len(row)):
-			ws.write(row_num, col_num, str(row[col_num]), font_style)
-	wb.save(response)
+	row_num = 1
+
+	for col_num, column_title in enumerate(columns, 1):
+		cell = worksheet.cell(row=row_num, column=col_num)
+		cell.value = column_title
+	for q in qs:
+		row_num += 1
+        
+        # Define the data for each cell in the row 
+		row = [
+            q.customer.account_no,
+            q.customer.name,
+            q.timestamp.strftime('%Y-%m-%d'),
+            type,
+            q.amount,
+        ]
+
+		for col_num, cell_value in enumerate(row, 1):
+			cell = worksheet.cell(row=row_num, column=col_num)
+			cell.value = cell_value
+	workbook.save(response)
 	return response

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load crispy_forms_tags %}
 {% block title %} BalanceSheet {% endblock title %}
 
 {% block content %}
@@ -15,9 +15,9 @@
   <div class="col">
     <div class="card card-body">
       <form method="get">
-          {{ depositTransactionFilter.form}}
+          {{ depositTransactionFilter.form|crispy}}
         <button class='btn btn-primary' type='Submit'>Search</button>
-        <a href="{%url 'export_excel' %}" class='btn btn-secondary'>Export to Excel</a>
+        <a href="{%url 'transactions:export_excel' 'Deposit' %}" class='btn btn-secondary'>Export to Excel</a>
       </form>
 
     </div>
@@ -51,10 +51,23 @@
 
 
 <h3>Withdrawal Details</h3>
+<div class="row">
+  <div class="col">
+    <div class="card card-body">
+      <form method="get">
+          {{ withdrawalTransactionFilter.form|crispy}}
+        <button class='btn btn-primary' type='Submit'>Search</button>
+        <a href="{%url 'transactions:export_excel' 'Withdrawal' %}" class='btn btn-secondary'>Export to Excel</a>
+      </form>
+
+    </div>
+  </div>
+</div>
 <table class="table table-hover table-bordered">
   <thead>
     <tr>
       <th>#</th>
+      <th>Account</th>
       <th>Date / Time</th>
       <th>Details</th>
       <th>Amount (Rs.)</th>
