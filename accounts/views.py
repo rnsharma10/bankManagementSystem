@@ -33,11 +33,13 @@ def register_view(request):
             )
             customer.save()
             login(request, user)
-            messages.success(request,
+            messages.add_message(request, messages.SUCCESS,
                 '''Hi, {}! Your account has been opened in Private bank. Your Account number is {}. 
                 Please use this for login next time.'''.format(
                 customer.name, customer.account_no)
             )
+            for message in messages.get_messages(request):
+                print(message.tags)
             return redirect("transactions:home")
         context = {
             'title':'Create Bank Account',
@@ -58,7 +60,8 @@ def login_view(request):
             user = authenticate(request, username=username, password=password)
             login(request, user)
             customer = Customer.objects.get(account_no = int(username))
-            messages.success(request, 'Welcome, {}!' .format(customer.name))
+            messages.add_message(request, messages.SUCCESS, 'Welcome, {}!'.format(customer.name))
+            
             return redirect('transactions:home')
         context = {
             'form':form,

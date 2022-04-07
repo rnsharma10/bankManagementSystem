@@ -20,7 +20,7 @@ class DepositTransactionFilter(django_filters.FilterSet):
 	)
 	class Meta:
 		model = Deposit
-		fields = ['customer']
+		exclude = ['customer', 'amount', 'timestamp']
 
 class WithdrawalTransactionFilter(django_filters.FilterSet):
 	start_date = DateFilter(
@@ -38,4 +38,4 @@ class WithdrawalTransactionFilter(django_filters.FilterSet):
 	)
 	class Meta:
 		model = Withdrawal
-		fields = ['customer']
+		exclude = ['customer', 'amount', 'timestamp']

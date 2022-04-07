@@ -10,7 +10,7 @@ from .filters import DepositTransactionFilter, WithdrawalTransactionFilter
 import xlwt
 from datetime import datetime
 from django.contrib import messages
-from openpyxl import Workbook
+from openpyxl import Workbook, utils
 
 # Create your views here.
 def home(request):
@@ -108,15 +108,16 @@ def withdrawalView(request):
         context['balance'] = get_object_or_404(Customer, user=request.user).balance
         return render(request, "transactions/form.html", context)
 
-
+@login_required
 def recordSheetView(request):
-    deposit = Deposit.objects.all()
-    withdrawal = Withdrawal.objects.all()
+
+    customer = Customer.objects.get(user=request.user)
+    deposit = Deposit.objects.filter(customer=customer)
+    withdrawal = Withdrawal.objects.filter(customer=customer)
     depositTransactionFilter = DepositTransactionFilter(request.GET, queryset=deposit)
     withdrawalTransactionFilter = WithdrawalTransactionFilter(request.GET, queryset=withdrawal)
     deposit = depositTransactionFilter.qs
     print(depositTransactionFilter)
-    withdrawal = Withdrawal.objects.all()
     
     # response = export_excel(deposit)
 
@@ -128,39 +129,51 @@ def recordSheetView(request):
     }
     return render(request, 'recordSheet.html', context)
 
+@login_required
 def export_excel(request, type):
+    print(request.GET)
     qs=None
     if type=='Deposit':
-        qs=Deposit.objects.all()
+        customer = Customer.objects.get(user=request.user)
+        qs = Deposit.objects.filter(customer=customer)
     elif type=='Withdrawal':
-        qs=Withdrawal.objects.all()
+        customer = Customer.objects.get(user=request.user)
+        qs = Withdrawal.objects.filter(customer=customer)
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',)
     response['Content-Disposition'] = 'attachment; filename={date}-DebitTransaction.xlsx'.format(date=datetime.now().strftime('%Y-%m-%d'),)
     workbook = Workbook()
 
+    print()
     worksheet = workbook.active
+    accountDetails = [['Name', customer.name], ['Account No.', customer.account_no]]
+    
+    worksheet.cell(1,1).value = 'Name'
+    worksheet.cell(1,2).value = customer.name
+    worksheet.cell(2,1).value = 'Account No.'
+    worksheet.cell(2,2).value = customer.account_no
+    worksheet.cell(3,1).value = 'Current Balance'
+    worksheet.cell(3,2).value = 'Rs. ' + str(customer.balance)
+
+
     columns = [
         
-        'Account_no',
-        'Name',
         'Date',
         'Type',
-        'Amount',
+        'Amount (Rs.)',
     ]
 
-    row_num = 1
+    row_num = 4
 
     for col_num, column_title in enumerate(columns, 1):
         cell = worksheet.cell(row=row_num, column=col_num)
         cell.value = column_title
+        worksheet.column_dimensions[utils.get_column_letter(col_num)].width = 30
     for q in qs:
         row_num += 1
         
         # Define the data for each cell in the row 
         row = [
-            q.customer.account_no,
-            q.customer.name,
             q.timestamp.strftime('%Y-%m-%d'),
             type,
             q.amount,
@@ -169,5 +182,6 @@ def export_excel(request, type):
         for col_num, cell_value in enumerate(row, 1):
             cell = worksheet.cell(row=row_num, column=col_num)
             cell.value = cell_value
+    
     workbook.save(response)
     return response

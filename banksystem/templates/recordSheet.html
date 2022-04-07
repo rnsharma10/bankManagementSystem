@@ -17,7 +17,7 @@
       <form method="get">
           {{ depositTransactionFilter.form|crispy}}
         <button class='btn btn-primary' type='Submit'>Search</button>
-        <a href="{%url 'transactions:export_excel' 'Deposit' %}" class='btn btn-secondary'>Export to Excel</a>
+        <a href="{%url 'transactions:export_excel' 'Deposit' %}" class='btn btn-secondary'>Export all to Excel</a>
       </form>
 
     </div>
@@ -27,9 +27,8 @@
   <thead>
     <tr>
       <th>#</th>
-      <th>Account</th>
       <th>Date / Time</th>
-      <th>Details</th>
+      <th>Transaction Type</th>
       <th>Amount (Rs.)</th>
     </tr>
   </thead>
@@ -37,7 +36,6 @@
     <tr>
     {% for obj in deposit %}
       <th scope="row">{{forloop.counter}}</th>
-      <td>{{obj.customer.account_no}}</td>
       <td>{{ obj.timestamp }}</td>
       <td>Deposit</td>
       <td>{{ obj.amount }}</td>
@@ -57,7 +55,7 @@
       <form method="get">
           {{ withdrawalTransactionFilter.form|crispy}}
         <button class='btn btn-primary' type='Submit'>Search</button>
-        <a href="{%url 'transactions:export_excel' 'Withdrawal' %}" class='btn btn-secondary'>Export to Excel</a>
+        <a href="{%url 'transactions:export_excel' 'Withdrawal' %}" class='btn btn-secondary'>Export all to Excel</a>
       </form>
 
     </div>
@@ -67,9 +65,8 @@
   <thead>
     <tr>
       <th>#</th>
-      <th>Account</th>
       <th>Date / Time</th>
-      <th>Details</th>
+      <th>Transaction Type</th>
       <th>Amount (Rs.)</th>
     </tr>
   </thead>
