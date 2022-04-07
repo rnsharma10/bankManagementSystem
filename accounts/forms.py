@@ -27,7 +27,7 @@ class CustomerForm(forms.ModelForm):
 			'phone'
 		]
 class UserLoginForm(forms.Form):
-	account_no = forms.CharField()
+	account_no = forms.IntegerField()
 	password = forms.CharField(widget=forms.PasswordInput)
 
 	def clean(self, *args, **kwargs):
